@@ -120,7 +120,7 @@ class _ItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
-    final bool showTitle = width > smallScreenBreakPoint;
+    final bool showTitle = width >= smallScreenBreakPoint;
 
     return Semantics(
       container: true,
