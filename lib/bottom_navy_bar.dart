@@ -15,6 +15,7 @@ class BottomNavyBar extends StatelessWidget {
   final double itemCornerRadius;
   final double containerHeight;
   final Curve curve;
+  final double smallScreenBreakPoint;
 
   BottomNavyBar({
     Key key,
@@ -29,6 +30,7 @@ class BottomNavyBar extends StatelessWidget {
     @required this.items,
     @required this.onItemSelected,
     this.curve = Curves.linear,
+    this.smallScreenBreakPoint = 360
   }) {
     assert(items != null);
     assert(items.length >= 2 && items.length <= 5);
@@ -72,6 +74,8 @@ class BottomNavyBar extends StatelessWidget {
                   itemCornerRadius: itemCornerRadius,
                   animationDuration: animationDuration,
                   curve: curve,
+                  smallScreenBreakPoint: smallScreenBreakPoint,
+                  containerHeight: containerHeight
                 ),
               );
             }).toList(),
@@ -90,6 +94,8 @@ class _ItemWidget extends StatelessWidget {
   final double itemCornerRadius;
   final Duration animationDuration;
   final Curve curve;
+  final double smallScreenBreakPoint;
+  final double containerHeight;
 
   const _ItemWidget({
     Key key,
@@ -100,6 +106,8 @@ class _ItemWidget extends StatelessWidget {
     @required this.itemCornerRadius,
     @required this.iconSize,
     this.curve = Curves.linear,
+    this.smallScreenBreakPoint,
+    this.containerHeight
   })  : assert(isSelected != null),
         assert(item != null),
         assert(backgroundColor != null),
@@ -111,11 +119,14 @@ class _ItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final bool showTitle = width > smallScreenBreakPoint;
+
     return Semantics(
       container: true,
       selected: isSelected,
       child: AnimatedContainer(
-        width: isSelected ? 130 : 50,
+        width: isSelected && showTitle ? 130 : 50,
         height: double.maxFinite,
         duration: animationDuration,
         curve: curve,
@@ -128,25 +139,29 @@ class _ItemWidget extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           physics: NeverScrollableScrollPhysics(),
           child: Container(
-            width: isSelected ? 130 : 50,
+            width: isSelected && showTitle ? 130 : 50,
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: showTitle ? MainAxisAlignment.start : MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                IconTheme(
-                  data: IconThemeData(
-                    size: iconSize,
-                    color: isSelected
-                        ? item.activeColor.withOpacity(1)
-                        : item.inactiveColor == null
-                            ? item.activeColor
-                            : item.inactiveColor,
+                Tooltip(
+                  message: item.title.data,
+                  verticalOffset: -containerHeight,
+                  child: IconTheme(
+                    data: IconThemeData(
+                      size: iconSize,
+                      color: isSelected
+                          ? item.activeColor.withOpacity(1)
+                          : item.inactiveColor == null
+                              ? item.activeColor
+                              : item.inactiveColor,
+                    ),
+                    child: item.icon,
                   ),
-                  child: item.icon,
                 ),
-                if (isSelected)
+                if (isSelected && showTitle)
                   Expanded(
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 4),
